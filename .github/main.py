@@ -8,7 +8,7 @@ COMPLIMENT_LIST = [
     "ty",
     "thx",
     "Thank you",
-    "love you (no homo)",
+    "love you",
     "you are amazing",
     "well done",
 ]
@@ -28,44 +28,17 @@ DURATION = 200
 severity = 0
 
 
-def severity_change(key):
-    global severity
-    if key == Key.right:
-        if severity < len(WORD_LIST)-1:
-            severity += 1
-            beeping(severity)
-    if key == Key.left:
-        if severity > 0:
-            severity -= 1
-            beeping(severity)
-    if key == Key.up or Key.down:
-        beeping(severity)
-
-
-def send_message() -> None:
-    """It sends an insult or compliment or a neutral message
-    """
-    global severity
-    wsh.SendKeys(chr(13))
-    try:
-        wsh.SendKeys(WORD_LIST[severity]
-                     [randint(0, len(WORD_LIST[severity])-1)])
-    except Exception:
-        severity = severity
-    wsh.SendKeys(chr(13))
-
-
-def beeping(noise: int) -> None:
-    """It will create a noise
+def beeping(pitch: int) -> None:
+    """Makes noise 
 
     Args:
-        noise (int): its input is an int that will decide the pitch
+        noise (int): the input decides the pitch
     """
-    winsound.Beep(noise*1000+1000, DURATION)
+    winsound.Beep(pitch*1000+1000, DURATION)
 
 
-def hub(key: str) -> None:
-    """ It will make the other functions run their code
+def writer(key: str) -> None:
+    """ It will make the other functions run their code and change the severity.
 
     Args:
         key (str): Its reads the key you are pressing and checks for \
@@ -88,11 +61,17 @@ def hub(key: str) -> None:
     if key == Key.up or Key.down:
         beeping(severity)
     if key == Key.ctrl_r:
-        send_message()
-    print(key)
+        wsh.SendKeys(chr(13))
+        try:
+            wsh.SendKeys(WORD_LIST[severity]
+                         [randint(0, len(WORD_LIST[severity])-1)])
+        except Exception:
+            severity = severity
+        wsh.SendKeys(chr(13))
     if key == Key.delete:
         return False
 
 
-with Listener(on_release=hub) as listener:
-    listener.join()
+if __name__ == "__main__":
+    with Listener(on_release=writer) as listener:
+        listener.join()
